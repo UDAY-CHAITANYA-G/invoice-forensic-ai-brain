@@ -1,4 +1,3 @@
-
 import React, { useCallback } from 'react';
 import { Upload, FileText, AlertCircle } from 'lucide-react';
 
@@ -24,6 +23,7 @@ const DocumentUpload: React.FC<DocumentUploadProps> = ({ onFileUpload }) => {
     const file = e.target.files?.[0];
     if (file) {
       onFileUpload(file);
+      e.target.value = ""; // Reset input so same file can be uploaded again
     }
   };
 

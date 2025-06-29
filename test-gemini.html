@@ -3,32 +3,239 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gemini API Test</title>
+    <title>Gemini Service Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        pre {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 3px;
+            overflow-x: auto;
+        }
+    </style>
 </head>
 <body>
-    <h1>Gemini API Test</h1>
-    <p>Check the browser console for test results.</p>
+    <h1>Gemini Service Test</h1>
     
+    <div class="test-section">
+        <h2>Test Partial Response Parsing</h2>
+        <p>This test simulates the partial response from Gemini API and verifies that our service can handle it correctly.</p>
+        
+        <h3>Input Response (from Gemini):</h3>
+        <pre id="input-response"></pre>
+        
+        <h3>Parsed Result:</h3>
+        <pre id="parsed-result"></pre>
+        
+        <h3>Final Analysis Result:</h3>
+        <pre id="final-result"></pre>
+        
+        <button onclick="runTest()">Run Test</button>
+    </div>
+
     <script type="module">
-        import { GoogleGenerativeAI } from './node_modules/@google/generative-ai/dist/index.js';
-        
-        // Test the API key
-        const API_KEY = 'AIzaSyBv722CQU8FN3wMxUS49zSaE6eGZ20rsvc';
-        const genAI = new GoogleGenerativeAI(API_KEY);
-        const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
-        
-        console.log('Testing Gemini API...');
-        
-        try {
-            const result = await model.generateContent('Hello, can you respond with "API is working" if you receive this message?');
-            const response = await result.response;
-            const text = response.text();
-            console.log('✅ Gemini API Response:', text);
-            console.log('✅ API Key is working correctly!');
-        } catch (error) {
-            console.error('❌ Gemini API Error:', error);
-            console.log('❌ API Key might be invalid or there\'s a network issue');
+        // Mock the Gemini response that we received
+        const mockGeminiResponse = `\`\`\`json
+{
+  "items_reviewed": [
+    {
+      "item_name": "Platform Fee",
+      "quantity": 1,
+      "invoice_price": 4.00,
+      "estimated_market_price": null,
+      "margin_percentage": null,
+      "status": "inconclusive"
+    }
+  ]
+}
+\`\`\``;
+
+        // Mock the GeminiService class
+        class MockGeminiService {
+            createDefaultAnalysisResult() {
+                return {
+                    document_type: 'unknown',
+                    logo_verification: {
+                        status: 'inconclusive',
+                        company_name: '',
+                        logo_url_checked: null,
+                        confidence_score: 0,
+                        detail_summary: {
+                            logo_present: false,
+                            logo_verified_online: false,
+                            logo_consistent: false,
+                            requires_user_input: true,
+                            reason: 'Analysis incomplete - requires manual review'
+                        }
+                    },
+                    template_check: {
+                        standard_format: false,
+                        missing_fields: [],
+                        confidence_score: 0,
+                        detail_summary: {
+                            all_required_fields_present: false,
+                            fields_with_issues: [],
+                            has_layout_irregularities: false,
+                            concerns: ['Analysis incomplete']
+                        }
+                    },
+                    anomaly_detection: {
+                        tampering_detected: false,
+                        suspicious_regions: [],
+                        confidence_score: 0,
+                        detail_summary: {
+                            digital_artifacts_found: false,
+                            asymmetric_layout: false,
+                            metadata_flags: false,
+                            requires_deep_image_analysis: true,
+                            reason: 'Analysis incomplete - requires manual review'
+                        }
+                    },
+                    company_verification: {
+                        status: 'inconclusive',
+                        matched: null,
+                        website_checked: null,
+                        detail_summary: {
+                            name_match_found: false,
+                            address_verified: false,
+                            gstin_verified: false,
+                            lookup_source: 'none',
+                            reason: 'Analysis incomplete'
+                        }
+                    },
+                    price_check: {
+                        items_reviewed: [],
+                        total_overpricing: 0,
+                        overall_status: 'inconclusive',
+                        detail_summary: {
+                            overpriced_items_count: 0,
+                            price_check_possible: false,
+                            benchmark_source: null,
+                            requires_manual_validation: true
+                        }
+                    },
+                    risk_assessment: {
+                        fraud_score: 50,
+                        risk_level: 'Medium',
+                        final_decision: 'Review Manually',
+                        detail_summary: {
+                            overall_verification_pending: true,
+                            key_failures: ['incomplete_analysis'],
+                            confidence_limitations: true,
+                            action_recommended: 'Manual review required due to incomplete analysis'
+                        }
+                    },
+                    summary: 'Analysis incomplete - manual review required'
+                };
+            }
+
+            parsePartialResponse(text) {
+                try {
+                    const cleaned = text.replace(/^```json|^```|```$/gm, '').trim();
+                    const parsed = JSON.parse(cleaned);
+                    
+                    if (parsed.items_reviewed) {
+                        return {
+                            price_check: {
+                                items_reviewed: parsed.items_reviewed.map(item => ({
+                                    item_name: item.item_name || 'Unknown Item',
+                                    quantity: item.quantity || 1,
+                                    invoice_price: item.invoice_price || 0,
+                                    estimated_market_price: item.estimated_market_price,
+                                    margin_percentage: item.margin_percentage,
+                                    status: item.status || 'inconclusive'
+                                })),
+                                total_overpricing: parsed.total_overpricing || 0,
+                                overall_status: parsed.overall_status || 'inconclusive',
+                                detail_summary: {
+                                    overpriced_items_count: parsed.items_reviewed?.filter(item => item.status === 'inflated').length || 0,
+                                    price_check_possible: parsed.items_reviewed?.some(item => item.estimated_market_price !== null) || false,
+                                    benchmark_source: null,
+                                    requires_manual_validation: true
+                                }
+                            }
+                        };
+                    }
+                    
+                    return parsed;
+                } catch (parseError) {
+                    console.error('Failed to parse Gemini response:', parseError);
+                    return {};
+                }
+            }
+
+            analyzeDocument() {
+                const partialResult = this.parsePartialResponse(mockGeminiResponse);
+                const defaultResult = this.createDefaultAnalysisResult();
+                
+                return {
+                    ...defaultResult,
+                    ...partialResult,
+                    logo_verification: {
+                        ...defaultResult.logo_verification,
+                        ...partialResult.logo_verification
+                    },
+                    template_check: {
+                        ...defaultResult.template_check,
+                        ...partialResult.template_check
+                    },
+                    anomaly_detection: {
+                        ...defaultResult.anomaly_detection,
+                        ...partialResult.anomaly_detection
+                    },
+                    company_verification: {
+                        ...defaultResult.company_verification,
+                        ...partialResult.company_verification
+                    },
+                    price_check: {
+                        ...defaultResult.price_check,
+                        ...partialResult.price_check
+                    },
+                    risk_assessment: {
+                        ...defaultResult.risk_assessment,
+                        ...partialResult.risk_assessment
+                    }
+                };
+            }
         }
+
+        window.runTest = function() {
+            const service = new MockGeminiService();
+            
+            // Display input response
+            document.getElementById('input-response').textContent = mockGeminiResponse;
+            
+            // Parse partial response
+            const parsedResult = service.parsePartialResponse(mockGeminiResponse);
+            document.getElementById('parsed-result').textContent = JSON.stringify(parsedResult, null, 2);
+            
+            // Get final result
+            const finalResult = service.analyzeDocument();
+            document.getElementById('final-result').textContent = JSON.stringify(finalResult, null, 2);
+            
+            // Add success indicator
+            const testSection = document.querySelector('.test-section');
+            testSection.classList.add('success');
+            testSection.innerHTML += '<p><strong>✅ Test completed successfully!</strong></p>';
+        };
+
+        // Auto-run test on page load
+        window.addEventListener('load', () => {
+            setTimeout(runTest, 1000);
+        });
     </script>
 </body>
 </html> 

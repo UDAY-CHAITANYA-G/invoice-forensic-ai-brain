@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Upload, FileText, Shield, AlertTriangle, CheckCircle, XCircle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -14,7 +14,8 @@ const Index = () => {
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [analysisData, setAnalysisData] = useState<AnalysisData | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [analysisStep, setAnalysisStep] = useState(0);
+  const [progress, setProgress] = useState(0);
+  const progressRef = useRef<NodeJS.Timeout | null>(null);
   const { toast } = useToast();
 
   const analysisSteps = [
@@ -26,15 +27,39 @@ const Index = () => {
     'Price Analysis'
   ];
 
+  // Gradually increase progress while analyzing
+  useEffect(() => {
+    if (isAnalyzing) {
+      setProgress(0);
+      if (progressRef.current) clearInterval(progressRef.current);
+      progressRef.current = setInterval(() => {
+        setProgress(prev => {
+          if (prev < 95) {
+            const next = prev + Math.random() * 2 + 0.5;
+            return next > 95 ? 95 : next;
+          } else {
+            return 95;
+          }
+        });
+      }, 50);
+    } else {
+      if (progressRef.current) clearInterval(progressRef.current);
+      setProgress(100);
+    }
+    return () => {
+      if (progressRef.current) clearInterval(progressRef.current);
+    };
+  }, [isAnalyzing]);
+
   const handleFileUpload = (file: File) => {
     setUploadedFile(file);
     setAnalysisData(null);
+    setProgress(0);
     startAnalysis(file);
   };
 
   const startAnalysis = async (file: File) => {
     setIsAnalyzing(true);
-    setAnalysisStep(0);
 
     try {
       // Check if Gemini API key is configured
@@ -50,61 +75,57 @@ const Index = () => {
 
       // Simulate analysis steps for UI feedback
       for (let i = 0; i < analysisSteps.length; i++) {
-        setAnalysisStep(i);
         await new Promise(resolve => setTimeout(resolve, 800));
       }
 
       // Call Gemini service for real analysis
       const geminiResult: GeminiAnalysisResult = await geminiService.analyzeDocument(file);
       
-      // Convert Gemini result to our AnalysisData format
+      // Convert Gemini result to our AnalysisData format - now they have the same structure
       const analysisResult: AnalysisData = {
-        document_type: (geminiResult.document_type as 'invoice' | 'receipt' | 'unknown') || 'unknown',
+        document_type: geminiResult.document_type as 'invoice' | 'receipt' | 'unknown',
         logo_verification: {
-          status: geminiResult.logo_verification.status === 'suspicious' ? 'unverified' : 
-                  geminiResult.logo_verification.status === 'unknown' ? 'not_found' : 
-                  'verified',
-          company_name: geminiResult.logo_verification.company_name || '',
-          logo_url_checked: null,
+          status: geminiResult.logo_verification.status,
+          company_name: geminiResult.logo_verification.company_name,
+          logo_url_checked: geminiResult.logo_verification.logo_url_checked,
           confidence_score: geminiResult.logo_verification.confidence_score,
-          notes: geminiResult.logo_verification.notes
+          detail_summary: geminiResult.logo_verification.detail_summary
         },
         template_check: {
           standard_format: geminiResult.template_check.standard_format,
           missing_fields: geminiResult.template_check.missing_fields,
-          confidence_score: geminiResult.template_check.confidence_score
+          confidence_score: geminiResult.template_check.confidence_score,
+          detail_summary: geminiResult.template_check.detail_summary
         },
         anomaly_detection: {
           tampering_detected: geminiResult.anomaly_detection.tampering_detected,
           suspicious_regions: geminiResult.anomaly_detection.suspicious_regions,
-          confidence_score: geminiResult.anomaly_detection.confidence_score
+          confidence_score: geminiResult.anomaly_detection.confidence_score,
+          detail_summary: geminiResult.anomaly_detection.detail_summary
         },
         company_verification: {
-          status: geminiResult.company_verification.status === 'suspicious' ? 'inconclusive' : 
-                  geminiResult.company_verification.status === 'unknown' ? 'inconclusive' : 
-                  'verified',
+          status: geminiResult.company_verification.status,
           matched: geminiResult.company_verification.matched,
-          website_checked: geminiResult.company_verification.website_checked || ''
+          website_checked: geminiResult.company_verification.website_checked,
+          detail_summary: geminiResult.company_verification.detail_summary
         },
         price_check: {
-          items_reviewed: geminiResult.price_check.items_reviewed.map(item => ({
-            ...item,
-            status: item.status === 'suspicious' ? 'inflated' : item.status as 'valid' | 'inflated'
-          })),
+          items_reviewed: geminiResult.price_check.items_reviewed,
           total_overpricing: geminiResult.price_check.total_overpricing,
-          overall_status: geminiResult.price_check.overall_status === 'fraudulent' ? 'suspicious' : 
-                         geminiResult.price_check.overall_status as 'valid' | 'suspicious'
+          overall_status: geminiResult.price_check.overall_status,
+          detail_summary: geminiResult.price_check.detail_summary
         },
         risk_assessment: {
           fraud_score: geminiResult.risk_assessment.fraud_score,
           risk_level: geminiResult.risk_assessment.risk_level,
-          final_decision: geminiResult.risk_assessment.fraud_score > 70 ? 'Reject' : 
-                         geminiResult.risk_assessment.fraud_score > 30 ? 'Review Manually' : 'Accept'
+          final_decision: geminiResult.risk_assessment.final_decision,
+          detail_summary: geminiResult.risk_assessment.detail_summary
         },
         summary: geminiResult.summary
       };
 
       setAnalysisData(analysisResult);
+      setProgress(100); // Complete progress
       
       toast({
         title: "Analysis Complete",
@@ -118,6 +139,7 @@ const Index = () => {
         description: error instanceof Error ? error.message : "Failed to analyze document. Please try again.",
         variant: "destructive",
       });
+      setProgress(100);
     } finally {
       setIsAnalyzing(false);
     }
@@ -181,38 +203,29 @@ const Index = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    <div className="text-sm text-slate-600">
-                      Current Step: {analysisSteps[analysisStep]}
+                    {/* Gradually increasing progress bar */}
+                    <div className="w-full h-2 rounded bg-blue-100 overflow-hidden relative">
+                      <div
+                        className="absolute left-0 top-0 h-full bg-blue-500 rounded transition-all duration-100"
+                        style={{ width: `${Math.min(progress, 100)}%`, minWidth: progress > 0 ? '8px' : 0 }}
+                      ></div>
                     </div>
-                    <Progress value={(analysisStep / (analysisSteps.length - 1)) * 100} className="w-full" />
-                    <div className="grid grid-cols-2 gap-2 text-sm">
-                      {analysisSteps.map((step, index) => (
-                        <div
-                          key={step}
-                          className={`flex items-center space-x-2 ${
-                            index < analysisStep
-                              ? 'text-green-600'
-                              : index === analysisStep
-                              ? 'text-blue-600 font-medium'
-                              : 'text-slate-400'
-                          }`}
-                        >
-                          {index < analysisStep ? (
-                            <CheckCircle className="h-4 w-4" />
-                          ) : index === analysisStep ? (
-                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
-                          ) : (
-                            <XCircle className="h-4 w-4" />
-                          )}
-                          <span>{step}</span>
-                        </div>
-                      ))}
+                    <div className="bg-slate-50 dark:bg-slate-800 p-4 rounded-lg border border-slate-200 dark:border-slate-700">
+                      <h4 className="font-medium mb-2 forensic-info text-blue-700">This analysis will check:</h4>
+                      <ul className="list-disc pl-6 text-sm text-slate-700 dark:text-slate-300">
+                        <li>Logo Authenticity: Verifies if the logo matches official brand sources.</li>
+                        <li>Template Structure: Checks for standard invoice fields and layout consistency.</li>
+                        <li>Image Anomaly Detection: Detects digital tampering or suspicious artifacts.</li>
+                        <li>Company Detail Verification: Confirms business details using public sources.</li>
+                        <li>Price Analysis: Flags overpriced items and compares to market rates.</li>
+                      </ul>
                     </div>
                   </div>
                 </CardContent>
               </Card>
             )}
 
+            {/* Show results when analysis is done (no progress bar, no complete card) */}
             {analysisData && !isAnalyzing && (
               <AnalysisResults data={analysisData} />
             )}

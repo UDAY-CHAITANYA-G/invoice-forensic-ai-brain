@@ -127,6 +127,8 @@ const AnalysisResults: React.FC<AnalysisResultsProps> = ({ data }) => {
     pdf.text(`Status: ${data.logo_verification.status}`, 10, yPosition);
     yPosition += 5;
     pdf.text(`Confidence: ${(data.logo_verification.confidence_score * 100).toFixed(1)}%`, 10, yPosition);
+    yPosition += 5;
+    pdf.text(`Reason: ${data.logo_verification.detail_summary.reason}`, 10, yPosition);
     yPosition += 10;
 
     // Section: Company Verification
@@ -142,6 +144,8 @@ const AnalysisResults: React.FC<AnalysisResultsProps> = ({ data }) => {
     pdf.text(`Status: ${data.company_verification.status}`, 10, yPosition);
     yPosition += 5;
     pdf.text(`Match Found: ${data.company_verification.matched ? 'Yes' : 'No'}`, 10, yPosition);
+    yPosition += 5;
+    pdf.text(`Reason: ${data.company_verification.detail_summary.reason}`, 10, yPosition);
     yPosition += 10;
 
     // Section: Price Analysis
@@ -175,9 +179,9 @@ const AnalysisResults: React.FC<AnalysisResultsProps> = ({ data }) => {
       yPosition += 5;
       pdf.text(`   Invoice Price: ${formatIndianCurrency(item.invoice_price)}`, 15, yPosition);
       yPosition += 5;
-      pdf.text(`   Market Price: ${formatIndianCurrency(item.estimated_market_price)}`, 15, yPosition);
+      pdf.text(`   Market Price: ${item.estimated_market_price ? formatIndianCurrency(item.estimated_market_price) : 'N/A'}`, 15, yPosition);
       yPosition += 5;
-      pdf.text(`   Margin: ${typeof item.margin_percentage === 'number' && item.margin_percentage > 50 ? 'forensic-suspicious' : 'forensic-verified'}`, 15, yPosition);
+      pdf.text(`   Margin: ${typeof item.margin_percentage === 'number' ? item.margin_percentage.toFixed(1) + '%' : 'N/A'}`, 15, yPosition);
       yPosition += 5;
       pdf.text(`   Status: ${item.status}`, 15, yPosition);
       yPosition += 7;
@@ -201,6 +205,8 @@ const AnalysisResults: React.FC<AnalysisResultsProps> = ({ data }) => {
     pdf.text(`Format: ${data.template_check.standard_format ? 'Standard' : 'Non-standard'}`, 10, yPosition);
     yPosition += 5;
     pdf.text(`Confidence: ${(data.template_check.confidence_score * 100).toFixed(1)}%`, 10, yPosition);
+    yPosition += 5;
+    pdf.text(`Reason: ${data.template_check.detail_summary.concerns.join(', ')}`, 10, yPosition);
     yPosition += 10;
 
     // Section: Anomaly Detection
@@ -220,6 +226,8 @@ const AnalysisResults: React.FC<AnalysisResultsProps> = ({ data }) => {
     pdf.text(`Tampering Detected: ${data.anomaly_detection.tampering_detected ? 'Yes' : 'No'}`, 10, yPosition);
     yPosition += 5;
     pdf.text(`Confidence: ${(data.anomaly_detection.confidence_score * 100).toFixed(1)}%`, 10, yPosition);
+    yPosition += 5;
+    pdf.text(`Reason: ${data.anomaly_detection.detail_summary.reason}`, 10, yPosition);
     yPosition += 10;
 
     // Footer with page number and branding
@@ -273,7 +281,7 @@ const AnalysisResults: React.FC<AnalysisResultsProps> = ({ data }) => {
               <p className="text-sm text-slate-700 dark:text-slate-300">{data.summary}</p>
             </div>
             
-            <div className="flex justify-between items-center pt-4 border-t border-slate-200 dark:border-slate-700">
+            <div className="flex justify-between items-center">
               <div>
                 <span className="text-sm text-slate-600 dark:text-slate-400">Recommended Action: </span>
                 <span className={`font-medium ${getRiskTextColor(data.risk_assessment.risk_level)}`}>
@@ -312,7 +320,7 @@ const AnalysisResults: React.FC<AnalysisResultsProps> = ({ data }) => {
                 <span className="font-medium">{(data.logo_verification.confidence_score * 100).toFixed(1)}%</span>
               </div>
               <div className="text-sm text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-slate-800 p-2 rounded border border-slate-200 dark:border-slate-700">
-                {data.logo_verification.notes}
+                {data.logo_verification.detail_summary.reason}
               </div>
             </div>
           </CardContent>
@@ -350,6 +358,9 @@ const AnalysisResults: React.FC<AnalysisResultsProps> = ({ data }) => {
                   </div>
                 </div>
               )}
+              <div className="text-sm text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-slate-800 p-2 rounded border border-slate-200 dark:border-slate-700">
+                {data.template_check.detail_summary.concerns.join(', ')}
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -386,6 +397,9 @@ const AnalysisResults: React.FC<AnalysisResultsProps> = ({ data }) => {
                   </div>
                 </div>
               )}
+              <div className="text-sm text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-slate-800 p-2 rounded border border-slate-200 dark:border-slate-700">
+                {data.anomaly_detection.detail_summary.reason}
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -425,6 +439,9 @@ const AnalysisResults: React.FC<AnalysisResultsProps> = ({ data }) => {
                   </a>
                 </div>
               )}
+              <div className="text-sm text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-slate-800 p-2 rounded border border-slate-200 dark:border-slate-700">
+                {data.company_verification.detail_summary.reason}
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -473,11 +490,11 @@ const AnalysisResults: React.FC<AnalysisResultsProps> = ({ data }) => {
                       <td className="py-2 font-medium">{item.item_name}</td>
                       <td className="text-center py-2">{item.quantity}</td>
                       <td className="text-right py-2">{formatIndianCurrency(item.invoice_price)}</td>
-                      <td className="text-right py-2">{formatIndianCurrency(item.estimated_market_price)}</td>
+                      <td className="text-right py-2">{item.estimated_market_price ? formatIndianCurrency(item.estimated_market_price) : 'N/A'}</td>
                       <td className={`text-right py-2 ${typeof item.margin_percentage === 'number' && item.margin_percentage > 50 ? 'forensic-suspicious' : 'forensic-verified'}`}>
-                        {Number.isFinite(item.margin_percentage)
+                        {typeof item.margin_percentage === 'number' && Number.isFinite(item.margin_percentage)
                           ? item.margin_percentage.toFixed(1) + '%'
-                          : String(item.margin_percentage)}
+                          : 'N/A'}
                       </td>
                       <td className="text-center py-2">
                         <Badge 
@@ -491,6 +508,12 @@ const AnalysisResults: React.FC<AnalysisResultsProps> = ({ data }) => {
                   ))}
                 </tbody>
               </table>
+            </div>
+            
+            <div className="text-sm text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-slate-800 p-2 rounded border border-slate-200 dark:border-slate-700">
+              {data.price_check.detail_summary.requires_manual_validation ? 
+                'Manual validation required - market prices could not be verified' : 
+                'Price analysis completed successfully'}
             </div>
           </div>
         </CardContent>
