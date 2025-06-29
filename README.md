@@ -1,8 +1,62 @@
-# Welcome to your Lovable project
+# Forensic Document Analyzer
 
-## Project info
+A professional fraud detection and verification system that uses AI-powered forensic analysis to detect fraudulent invoices and receipts.
 
-**URL**: https://lovable.dev/projects/62b82d0a-ee5d-438c-a9eb-cd4ebba5ba2a
+## Features
+
+- **AI-Powered Analysis**: Integrated with Google Gemini AI for real-time document analysis
+- **Comprehensive Forensics**: Logo authenticity, template structure, anomaly detection
+- **Price Analysis**: Market comparison and fraud detection
+- **Risk Assessment**: Automated fraud scoring and recommendations
+- **Modern UI**: Built with React, TypeScript, and shadcn/ui
+
+## AI Integration
+
+This project integrates with **Google Gemini AI** for advanced document analysis:
+
+- Real-time document processing
+- Intelligent fraud detection
+- Comprehensive forensic analysis
+- Structured JSON output
+
+**Setup Required**: See [GEMINI_SETUP.md](./GEMINI_SETUP.md) for detailed setup instructions.
+
+## Quick Start
+
+```sh
+# Clone the repository
+git clone <YOUR_GIT_URL>
+
+# Navigate to the project directory
+cd invoice-forensic-ai-brain
+
+# Install dependencies
+npm install
+
+# Set up Gemini API key (see GEMINI_SETUP.md)
+# Create .env file with: VITE_GEMINI_API_KEY=your_api_key
+
+# Start development server
+npm run dev
+```
+
+## Technologies
+
+- **Frontend**: React, TypeScript, Vite
+- **UI**: shadcn/ui, Tailwind CSS
+- **AI**: Google Gemini AI
+- **State Management**: React Query
+
+## Project Structure
+
+```
+src/
+├── components/          # UI components
+├── services/           # API services (Gemini integration)
+├── pages/              # Page components
+├── types/              # TypeScript definitions
+└── hooks/              # Custom React hooks
+```
 
 ## How can I edit this code?
 
@@ -49,16 +103,6 @@ npm run dev
 - Select the "Codespaces" tab.
 - Click on "New codespace" to launch a new Codespace environment.
 - Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
 
 ## How can I deploy this project?
 

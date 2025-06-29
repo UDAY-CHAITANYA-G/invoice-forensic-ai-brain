@@ -7,12 +7,15 @@ import DocumentUpload from '@/components/DocumentUpload';
 import DocumentPreview from '@/components/DocumentPreview';
 import AnalysisResults from '@/components/AnalysisResults';
 import { AnalysisData } from '@/types/forensic';
+import { geminiService, GeminiAnalysisResult } from '@/services/geminiService';
+import { useToast } from '@/hooks/use-toast';
 
 const Index = () => {
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [analysisData, setAnalysisData] = useState<AnalysisData | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisStep, setAnalysisStep] = useState(0);
+  const { toast } = useToast();
 
   const analysisSteps = [
     'Document Type Detection',
@@ -33,69 +36,91 @@ const Index = () => {
     setIsAnalyzing(true);
     setAnalysisStep(0);
 
-    // Simulate forensic analysis process
-    for (let i = 0; i < analysisSteps.length; i++) {
-      setAnalysisStep(i);
-      await new Promise(resolve => setTimeout(resolve, 1500));
+    try {
+      // Check if Gemini API key is configured
+      if (!import.meta.env.VITE_GEMINI_API_KEY) {
+        toast({
+          title: "Configuration Error",
+          description: "Gemini API key not configured. Please add VITE_GEMINI_API_KEY to your environment variables.",
+          variant: "destructive",
+        });
+        setIsAnalyzing(false);
+        return;
+      }
+
+      // Simulate analysis steps for UI feedback
+      for (let i = 0; i < analysisSteps.length; i++) {
+        setAnalysisStep(i);
+        await new Promise(resolve => setTimeout(resolve, 800));
+      }
+
+      // Call Gemini service for real analysis
+      const geminiResult: GeminiAnalysisResult = await geminiService.analyzeDocument(file);
+      
+      // Convert Gemini result to our AnalysisData format
+      const analysisResult: AnalysisData = {
+        document_type: (geminiResult.document_type as 'invoice' | 'receipt' | 'unknown') || 'unknown',
+        logo_verification: {
+          status: geminiResult.logo_verification.status === 'suspicious' ? 'unverified' : 
+                  geminiResult.logo_verification.status === 'unknown' ? 'not_found' : 
+                  'verified',
+          company_name: geminiResult.logo_verification.company_name || '',
+          logo_url_checked: null,
+          confidence_score: geminiResult.logo_verification.confidence_score,
+          notes: geminiResult.logo_verification.notes
+        },
+        template_check: {
+          standard_format: geminiResult.template_check.standard_format,
+          missing_fields: geminiResult.template_check.missing_fields,
+          confidence_score: geminiResult.template_check.confidence_score
+        },
+        anomaly_detection: {
+          tampering_detected: geminiResult.anomaly_detection.tampering_detected,
+          suspicious_regions: geminiResult.anomaly_detection.suspicious_regions,
+          confidence_score: geminiResult.anomaly_detection.confidence_score
+        },
+        company_verification: {
+          status: geminiResult.company_verification.status === 'suspicious' ? 'inconclusive' : 
+                  geminiResult.company_verification.status === 'unknown' ? 'inconclusive' : 
+                  'verified',
+          matched: geminiResult.company_verification.matched,
+          website_checked: geminiResult.company_verification.website_checked || ''
+        },
+        price_check: {
+          items_reviewed: geminiResult.price_check.items_reviewed.map(item => ({
+            ...item,
+            status: item.status === 'suspicious' ? 'inflated' : item.status as 'valid' | 'inflated'
+          })),
+          total_overpricing: geminiResult.price_check.total_overpricing,
+          overall_status: geminiResult.price_check.overall_status === 'fraudulent' ? 'suspicious' : 
+                         geminiResult.price_check.overall_status as 'valid' | 'suspicious'
+        },
+        risk_assessment: {
+          fraud_score: geminiResult.risk_assessment.fraud_score,
+          risk_level: geminiResult.risk_assessment.risk_level,
+          final_decision: geminiResult.risk_assessment.fraud_score > 70 ? 'Reject' : 
+                         geminiResult.risk_assessment.fraud_score > 30 ? 'Review Manually' : 'Accept'
+        },
+        summary: geminiResult.summary
+      };
+
+      setAnalysisData(analysisResult);
+      
+      toast({
+        title: "Analysis Complete",
+        description: "Document forensic analysis has been completed successfully.",
+      });
+
+    } catch (error) {
+      console.error('Analysis failed:', error);
+      toast({
+        title: "Analysis Failed",
+        description: error instanceof Error ? error.message : "Failed to analyze document. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsAnalyzing(false);
     }
-
-    // Mock analysis results with Indian currency
-    const mockResults: AnalysisData = {
-      document_type: 'invoice',
-      logo_verification: {
-        status: 'verified',
-        company_name: 'TechCorp Solutions',
-        logo_url_checked: null,
-        confidence_score: 0.92,
-        notes: 'Logo matches known database entries'
-      },
-      template_check: {
-        standard_format: true,
-        missing_fields: [],
-        confidence_score: 0.95
-      },
-      anomaly_detection: {
-        tampering_detected: false,
-        suspicious_regions: [],
-        confidence_score: 0.88
-      },
-      company_verification: {
-        status: 'verified',
-        matched: true,
-        website_checked: 'https://techcorp-solutions.com'
-      },
-      price_check: {
-        items_reviewed: [
-          {
-            item_name: 'Software License',
-            quantity: 5,
-            invoice_price: 24999.00,
-            estimated_market_price: 23299.00,
-            margin_percentage: 7.1,
-            status: 'valid'
-          },
-          {
-            item_name: 'Support Package',
-            quantity: 1,
-            invoice_price: 108299.00,
-            estimated_market_price: 74999.00,
-            margin_percentage: 44.4,
-            status: 'inflated'
-          }
-        ],
-        total_overpricing: 33300.00,
-        overall_status: 'suspicious'
-      },
-      risk_assessment: {
-        fraud_score: 35,
-        risk_level: 'Medium',
-        final_decision: 'Review Manually'
-      },
-      summary: 'This invoice shows mixed authenticity indicators. While the company verification and template structure appear legitimate, significant price inflation was detected in the support package item, suggesting potential fraudulent activity. Manual review is recommended.'
-    };
-
-    setAnalysisData(mockResults);
-    setIsAnalyzing(false);
   };
 
   return (

@@ -177,7 +177,7 @@ const AnalysisResults: React.FC<AnalysisResultsProps> = ({ data }) => {
       yPosition += 5;
       pdf.text(`   Market Price: ${formatIndianCurrency(item.estimated_market_price)}`, 15, yPosition);
       yPosition += 5;
-      pdf.text(`   Margin: ${item.margin_percentage.toFixed(1)}%`, 15, yPosition);
+      pdf.text(`   Margin: ${typeof item.margin_percentage === 'number' && item.margin_percentage > 50 ? 'forensic-suspicious' : 'forensic-verified'}`, 15, yPosition);
       yPosition += 5;
       pdf.text(`   Status: ${item.status}`, 15, yPosition);
       yPosition += 7;
@@ -223,7 +223,7 @@ const AnalysisResults: React.FC<AnalysisResultsProps> = ({ data }) => {
     yPosition += 10;
 
     // Footer with page number and branding
-    const pageCount = pdf.internal.getNumberOfPages();
+    const pageCount = pdf.internal.pages.length;
     for (let i = 1; i <= pageCount; i++) {
       pdf.setPage(i);
       pdf.setFontSize(9);
@@ -474,8 +474,10 @@ const AnalysisResults: React.FC<AnalysisResultsProps> = ({ data }) => {
                       <td className="text-center py-2">{item.quantity}</td>
                       <td className="text-right py-2">{formatIndianCurrency(item.invoice_price)}</td>
                       <td className="text-right py-2">{formatIndianCurrency(item.estimated_market_price)}</td>
-                      <td className={`text-right py-2 ${item.margin_percentage > 50 ? 'forensic-suspicious' : 'forensic-verified'}`}>
-                        {item.margin_percentage.toFixed(1)}%
+                      <td className={`text-right py-2 ${typeof item.margin_percentage === 'number' && item.margin_percentage > 50 ? 'forensic-suspicious' : 'forensic-verified'}`}>
+                        {Number.isFinite(item.margin_percentage)
+                          ? item.margin_percentage.toFixed(1) + '%'
+                          : String(item.margin_percentage)}
                       </td>
                       <td className="text-center py-2">
                         <Badge 
