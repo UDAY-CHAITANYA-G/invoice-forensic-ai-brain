@@ -14,21 +14,31 @@ interface AnalysisResultsProps {
 const AnalysisResults: React.FC<AnalysisResultsProps> = ({ data }) => {
   const getRiskColor = (level: string) => {
     switch (level) {
-      case 'Low': return 'text-green-600 bg-green-50 border-green-200';
-      case 'Medium': return 'text-yellow-600 bg-yellow-50 border-yellow-200';
-      case 'High': return 'text-orange-600 bg-orange-50 border-orange-200';
-      case 'Critical': return 'text-red-600 bg-red-50 border-red-200';
-      default: return 'text-slate-600 bg-slate-50 border-slate-200';
+      case 'Low': return 'bg-forensic-success border-2 border-forensic-success/30';
+      case 'Medium': return 'bg-forensic-warning border-2 border-forensic-warning/30';
+      case 'High': return 'bg-forensic-suspicious border-2 border-forensic-suspicious/30';
+      case 'Critical': return 'bg-forensic-critical border-2 border-forensic-critical/30';
+      default: return 'bg-forensic-neutral border-2 border-forensic-neutral/30';
+    }
+  };
+
+  const getRiskTextColor = (level: string) => {
+    switch (level) {
+      case 'Low': return 'forensic-success';
+      case 'Medium': return 'forensic-warning';
+      case 'High': return 'forensic-suspicious';
+      case 'Critical': return 'forensic-critical';
+      default: return 'forensic-neutral';
     }
   };
 
   const getStatusIcon = (status: boolean | string) => {
     if (status === true || status === 'verified') {
-      return <CheckCircle className="h-5 w-5 text-green-500" />;
+      return <CheckCircle className="h-5 w-5 forensic-verified" />;
     } else if (status === false || status === 'unverified') {
-      return <XCircle className="h-5 w-5 text-red-500" />;
+      return <XCircle className="h-5 w-5 forensic-danger" />;
     } else {
-      return <AlertTriangle className="h-5 w-5 text-yellow-500" />;
+      return <AlertTriangle className="h-5 w-5 forensic-warning" />;
     }
   };
 
@@ -177,12 +187,12 @@ const AnalysisResults: React.FC<AnalysisResultsProps> = ({ data }) => {
   return (
     <div className="space-y-6">
       {/* Risk Assessment Overview */}
-      <Card className={`border-2 ${getRiskColor(data.risk_assessment.risk_level)}`}>
+      <Card className={getRiskColor(data.risk_assessment.risk_level)}>
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
-            <Shield className="h-6 w-6" />
+            <Shield className={`h-6 w-6 ${getRiskTextColor(data.risk_assessment.risk_level)}`} />
             <span>Risk Assessment</span>
-            <Badge variant="outline" className={getRiskColor(data.risk_assessment.risk_level)}>
+            <Badge variant="outline" className={`${getRiskTextColor(data.risk_assessment.risk_level)} border-current`}>
               {data.risk_assessment.risk_level} Risk
             </Badge>
           </CardTitle>
@@ -192,20 +202,24 @@ const AnalysisResults: React.FC<AnalysisResultsProps> = ({ data }) => {
             <div>
               <div className="flex justify-between items-center mb-2">
                 <span className="text-sm font-medium">Fraud Score</span>
-                <span className="text-2xl font-bold">{data.risk_assessment.fraud_score}/100</span>
+                <span className={`text-2xl font-bold ${getRiskTextColor(data.risk_assessment.risk_level)}`}>
+                  {data.risk_assessment.fraud_score}/100
+                </span>
               </div>
               <Progress value={data.risk_assessment.fraud_score} className="h-3" />
             </div>
             
-            <div className="bg-slate-50 p-4 rounded-lg">
-              <h4 className="font-medium mb-2">Analysis Summary</h4>
-              <p className="text-sm text-slate-700">{data.summary}</p>
+            <div className="bg-slate-50 dark:bg-slate-800 p-4 rounded-lg border border-slate-200 dark:border-slate-700">
+              <h4 className="font-medium mb-2 forensic-info">Analysis Summary</h4>
+              <p className="text-sm text-slate-700 dark:text-slate-300">{data.summary}</p>
             </div>
             
-            <div className="flex justify-between items-center pt-4 border-t">
+            <div className="flex justify-between items-center pt-4 border-t border-slate-200 dark:border-slate-700">
               <div>
-                <span className="text-sm text-slate-600">Recommended Action: </span>
-                <span className="font-medium">{data.risk_assessment.final_decision}</span>
+                <span className="text-sm text-slate-600 dark:text-slate-400">Recommended Action: </span>
+                <span className={`font-medium ${getRiskTextColor(data.risk_assessment.risk_level)}`}>
+                  {data.risk_assessment.final_decision}
+                </span>
               </div>
               <div className="flex space-x-2">
                 <Button onClick={handleExportPDF} variant="outline" size="sm">
@@ -225,7 +239,7 @@ const AnalysisResults: React.FC<AnalysisResultsProps> = ({ data }) => {
       {/* Detailed Analysis Results */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Logo Verification */}
-        <Card>
+        <Card className="border-slate-200 dark:border-slate-700">
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
               {getStatusIcon(data.logo_verification.status === 'verified')}
@@ -235,14 +249,14 @@ const AnalysisResults: React.FC<AnalysisResultsProps> = ({ data }) => {
           <CardContent>
             <div className="space-y-3">
               <div>
-                <span className="text-sm text-slate-600">Company: </span>
-                <span className="font-medium">{data.logo_verification.company_name}</span>
+                <span className="text-sm text-slate-600 dark:text-slate-400">Company: </span>
+                <span className="font-medium forensic-info">{data.logo_verification.company_name}</span>
               </div>
               <div>
-                <span className="text-sm text-slate-600">Confidence: </span>
+                <span className="text-sm text-slate-600 dark:text-slate-400">Confidence: </span>
                 <span className="font-medium">{(data.logo_verification.confidence_score * 100).toFixed(1)}%</span>
               </div>
-              <div className="text-sm text-slate-700 bg-slate-50 p-2 rounded">
+              <div className="text-sm text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-slate-800 p-2 rounded border border-slate-200 dark:border-slate-700">
                 {data.logo_verification.notes}
               </div>
             </div>
@@ -250,7 +264,7 @@ const AnalysisResults: React.FC<AnalysisResultsProps> = ({ data }) => {
         </Card>
 
         {/* Template Check */}
-        <Card>
+        <Card className="border-slate-200 dark:border-slate-700">
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
               {getStatusIcon(data.template_check.standard_format)}
@@ -260,21 +274,21 @@ const AnalysisResults: React.FC<AnalysisResultsProps> = ({ data }) => {
           <CardContent>
             <div className="space-y-3">
               <div>
-                <span className="text-sm text-slate-600">Format: </span>
-                <span className="font-medium">
+                <span className="text-sm text-slate-600 dark:text-slate-400">Format: </span>
+                <span className={`font-medium ${data.template_check.standard_format ? 'forensic-verified' : 'forensic-warning'}`}>
                   {data.template_check.standard_format ? 'Standard' : 'Non-standard'}
                 </span>
               </div>
               <div>
-                <span className="text-sm text-slate-600">Confidence: </span>
+                <span className="text-sm text-slate-600 dark:text-slate-400">Confidence: </span>
                 <span className="font-medium">{(data.template_check.confidence_score * 100).toFixed(1)}%</span>
               </div>
               {data.template_check.missing_fields.length > 0 && (
                 <div>
-                  <span className="text-sm text-slate-600">Missing Fields: </span>
+                  <span className="text-sm text-slate-600 dark:text-slate-400">Missing Fields: </span>
                   <div className="flex flex-wrap gap-1 mt-1">
                     {data.template_check.missing_fields.map((field) => (
-                      <Badge key={field} variant="destructive" className="text-xs">
+                      <Badge key={field} variant="destructive" className="text-xs bg-forensic-danger">
                         {field}
                       </Badge>
                     ))}
@@ -286,7 +300,7 @@ const AnalysisResults: React.FC<AnalysisResultsProps> = ({ data }) => {
         </Card>
 
         {/* Anomaly Detection */}
-        <Card>
+        <Card className="border-slate-200 dark:border-slate-700">
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
               {getStatusIcon(!data.anomaly_detection.tampering_detected)}
@@ -296,21 +310,21 @@ const AnalysisResults: React.FC<AnalysisResultsProps> = ({ data }) => {
           <CardContent>
             <div className="space-y-3">
               <div>
-                <span className="text-sm text-slate-600">Tampering: </span>
-                <span className="font-medium">
+                <span className="text-sm text-slate-600 dark:text-slate-400">Tampering: </span>
+                <span className={`font-medium ${data.anomaly_detection.tampering_detected ? 'forensic-danger' : 'forensic-verified'}`}>
                   {data.anomaly_detection.tampering_detected ? 'Detected' : 'None Detected'}
                 </span>
               </div>
               <div>
-                <span className="text-sm text-slate-600">Confidence: </span>
+                <span className="text-sm text-slate-600 dark:text-slate-400">Confidence: </span>
                 <span className="font-medium">{(data.anomaly_detection.confidence_score * 100).toFixed(1)}%</span>
               </div>
               {data.anomaly_detection.suspicious_regions.length > 0 && (
                 <div>
-                  <span className="text-sm text-slate-600">Suspicious Regions: </span>
+                  <span className="text-sm text-slate-600 dark:text-slate-400">Suspicious Regions: </span>
                   <div className="flex flex-wrap gap-1 mt-1">
                     {data.anomaly_detection.suspicious_regions.map((region) => (
-                      <Badge key={region} variant="destructive" className="text-xs">
+                      <Badge key={region} variant="destructive" className="text-xs bg-forensic-suspicious">
                         {region}
                       </Badge>
                     ))}
@@ -322,7 +336,7 @@ const AnalysisResults: React.FC<AnalysisResultsProps> = ({ data }) => {
         </Card>
 
         {/* Company Verification */}
-        <Card>
+        <Card className="border-slate-200 dark:border-slate-700">
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
               {getStatusIcon(data.company_verification.status === 'verified')}
@@ -332,21 +346,25 @@ const AnalysisResults: React.FC<AnalysisResultsProps> = ({ data }) => {
           <CardContent>
             <div className="space-y-3">
               <div>
-                <span className="text-sm text-slate-600">Status: </span>
-                <span className="font-medium capitalize">{data.company_verification.status}</span>
+                <span className="text-sm text-slate-600 dark:text-slate-400">Status: </span>
+                <span className={`font-medium capitalize ${data.company_verification.status === 'verified' ? 'forensic-verified' : 'forensic-warning'}`}>
+                  {data.company_verification.status}
+                </span>
               </div>
               <div>
-                <span className="text-sm text-slate-600">Match Found: </span>
-                <span className="font-medium">{data.company_verification.matched ? 'Yes' : 'No'}</span>
+                <span className="text-sm text-slate-600 dark:text-slate-400">Match Found: </span>
+                <span className={`font-medium ${data.company_verification.matched ? 'forensic-verified' : 'forensic-danger'}`}>
+                  {data.company_verification.matched ? 'Yes' : 'No'}
+                </span>
               </div>
               {data.company_verification.website_checked && (
                 <div>
-                  <span className="text-sm text-slate-600">Website: </span>
+                  <span className="text-sm text-slate-600 dark:text-slate-400">Website: </span>
                   <a 
                     href={data.company_verification.website_checked} 
                     target="_blank" 
                     rel="noopener noreferrer"
-                    className="text-blue-600 hover:underline text-sm"
+                    className="forensic-info hover:underline text-sm"
                   >
                     {data.company_verification.website_checked}
                   </a>
@@ -358,14 +376,15 @@ const AnalysisResults: React.FC<AnalysisResultsProps> = ({ data }) => {
       </div>
 
       {/* Price Analysis */}
-      <Card>
+      <Card className="border-slate-200 dark:border-slate-700">
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
             {getStatusIcon(data.price_check.overall_status === 'valid')}
-            <IndianRupee className="h-5 w-5" />
+            <IndianRupee className="h-5 w-5 forensic-info" />
             <span>Price Analysis</span>
             <Badge 
               variant={data.price_check.overall_status === 'valid' ? 'default' : 'destructive'}
+              className={data.price_check.overall_status === 'valid' ? 'bg-forensic-verified' : 'bg-forensic-danger'}
             >
               {data.price_check.overall_status}
             </Badge>
@@ -374,8 +393,8 @@ const AnalysisResults: React.FC<AnalysisResultsProps> = ({ data }) => {
         <CardContent>
           <div className="space-y-4">
             {data.price_check.total_overpricing > 0 && (
-              <div className="bg-red-50 p-3 rounded-lg border border-red-200">
-                <span className="text-sm text-red-800">
+              <div className="bg-forensic-danger p-3 rounded-lg border border-forensic-danger/30">
+                <span className="text-sm forensic-danger">
                   Total Overpricing Detected: <span className="font-bold">{formatIndianCurrency(data.price_check.total_overpricing)}</span>
                 </span>
               </div>
@@ -384,27 +403,29 @@ const AnalysisResults: React.FC<AnalysisResultsProps> = ({ data }) => {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b">
-                    <th className="text-left py-2">Item</th>
-                    <th className="text-center py-2">Qty</th>
-                    <th className="text-right py-2">Invoice Price</th>
-                    <th className="text-right py-2">Market Price</th>
-                    <th className="text-right py-2">Margin</th>
-                    <th className="text-center py-2">Status</th>
+                  <tr className="border-b border-slate-200 dark:border-slate-700">
+                    <th className="text-left py-2 forensic-info">Item</th>
+                    <th className="text-center py-2 forensic-info">Qty</th>
+                    <th className="text-right py-2 forensic-info">Invoice Price</th>
+                    <th className="text-right py-2 forensic-info">Market Price</th>
+                    <th className="text-right py-2 forensic-info">Margin</th>
+                    <th className="text-center py-2 forensic-info">Status</th>
                   </tr>
                 </thead>
                 <tbody>
                   {data.price_check.items_reviewed.map((item, index) => (
-                    <tr key={index} className="border-b">
+                    <tr key={index} className="border-b border-slate-100 dark:border-slate-800">
                       <td className="py-2 font-medium">{item.item_name}</td>
                       <td className="text-center py-2">{item.quantity}</td>
                       <td className="text-right py-2">{formatIndianCurrency(item.invoice_price)}</td>
                       <td className="text-right py-2">{formatIndianCurrency(item.estimated_market_price)}</td>
-                      <td className="text-right py-2">{item.margin_percentage.toFixed(1)}%</td>
+                      <td className={`text-right py-2 ${item.margin_percentage > 50 ? 'forensic-suspicious' : 'forensic-verified'}`}>
+                        {item.margin_percentage.toFixed(1)}%
+                      </td>
                       <td className="text-center py-2">
                         <Badge 
                           variant={item.status === 'valid' ? 'default' : 'destructive'}
-                          className="text-xs"
+                          className={`text-xs ${item.status === 'valid' ? 'bg-forensic-verified' : 'bg-forensic-danger'}`}
                         >
                           {item.status}
                         </Badge>

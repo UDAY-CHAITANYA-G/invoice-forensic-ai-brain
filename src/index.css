@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -8,89 +9,103 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --background: 0 0% 98%;
+    --foreground: 210 20% 15%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 210 20% 15%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 210 20% 15%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 210 100% 25%;
+    --primary-foreground: 0 0% 98%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 210 20% 92%;
+    --secondary-foreground: 210 20% 15%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 210 15% 94%;
+    --muted-foreground: 210 10% 45%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 200 80% 45%;
+    --accent-foreground: 0 0% 98%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 75% 55%;
+    --destructive-foreground: 0 0% 98%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 210 15% 88%;
+    --input: 210 15% 88%;
+    --ring: 210 100% 25%;
 
     --radius: 0.5rem;
 
-    --sidebar-background: 0 0% 98%;
-
-    --sidebar-foreground: 240 5.3% 26.1%;
-
-    --sidebar-primary: 240 5.9% 10%;
-
+    --sidebar-background: 210 25% 97%;
+    --sidebar-foreground: 210 20% 25%;
+    --sidebar-primary: 210 100% 25%;
     --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 210 15% 92%;
+    --sidebar-accent-foreground: 210 20% 25%;
+    --sidebar-border: 210 15% 85%;
+    --sidebar-ring: 210 100% 25%;
 
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    /* Forensic-specific colors */
+    --forensic-danger: 0 75% 55%;
+    --forensic-warning: 45 95% 50%;
+    --forensic-success: 140 60% 40%;
+    --forensic-info: 210 100% 50%;
+    --forensic-critical: 15 85% 45%;
+    --forensic-verified: 140 70% 35%;
+    --forensic-suspicious: 25 90% 55%;
+    --forensic-neutral: 210 10% 60%;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    --background: 210 25% 8%;
+    --foreground: 210 20% 90%;
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    --card: 210 25% 10%;
+    --card-foreground: 210 20% 90%;
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 210 25% 10%;
+    --popover-foreground: 210 20% 90%;
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 210 80% 60%;
+    --primary-foreground: 210 25% 8%;
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 210 20% 15%;
+    --secondary-foreground: 210 20% 85%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 210 20% 12%;
+    --muted-foreground: 210 15% 65%;
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 200 70% 60%;
+    --accent-foreground: 210 25% 8%;
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 65% 60%;
+    --destructive-foreground: 0 0% 98%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --border: 210 20% 18%;
+    --input: 210 20% 18%;
+    --ring: 210 80% 60%;
+
+    --sidebar-background: 210 25% 6%;
+    --sidebar-foreground: 210 20% 85%;
+    --sidebar-primary: 210 80% 60%;
+    --sidebar-primary-foreground: 210 25% 8%;
+    --sidebar-accent: 210 20% 12%;
+    --sidebar-accent-foreground: 210 20% 85%;
+    --sidebar-border: 210 20% 15%;
+    --sidebar-ring: 210 80% 60%;
+
+    /* Forensic-specific colors for dark mode */
+    --forensic-danger: 0 70% 65%;
+    --forensic-warning: 45 85% 60%;
+    --forensic-success: 140 50% 50%;
+    --forensic-info: 210 80% 65%;
+    --forensic-critical: 15 75% 60%;
+    --forensic-verified: 140 60% 45%;
+    --forensic-suspicious: 25 80% 65%;
+    --forensic-neutral: 210 15% 50%;
   }
 }
 
@@ -101,5 +116,69 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
+  }
+
+  /* Forensic-specific utility classes */
+  .forensic-danger {
+    color: hsl(var(--forensic-danger));
+  }
+  
+  .forensic-warning {
+    color: hsl(var(--forensic-warning));
+  }
+  
+  .forensic-success {
+    color: hsl(var(--forensic-success));
+  }
+  
+  .forensic-info {
+    color: hsl(var(--forensic-info));
+  }
+  
+  .forensic-critical {
+    color: hsl(var(--forensic-critical));
+  }
+  
+  .forensic-verified {
+    color: hsl(var(--forensic-verified));
+  }
+  
+  .forensic-suspicious {
+    color: hsl(var(--forensic-suspicious));
+  }
+  
+  .forensic-neutral {
+    color: hsl(var(--forensic-neutral));
+  }
+
+  /* Background variants */
+  .bg-forensic-danger {
+    background-color: hsl(var(--forensic-danger) / 0.1);
+    border-color: hsl(var(--forensic-danger) / 0.3);
+  }
+  
+  .bg-forensic-warning {
+    background-color: hsl(var(--forensic-warning) / 0.1);
+    border-color: hsl(var(--forensic-warning) / 0.3);
+  }
+  
+  .bg-forensic-success {
+    background-color: hsl(var(--forensic-success) / 0.1);
+    border-color: hsl(var(--forensic-success) / 0.3);
+  }
+  
+  .bg-forensic-critical {
+    background-color: hsl(var(--forensic-critical) / 0.1);
+    border-color: hsl(var(--forensic-critical) / 0.3);
+  }
+  
+  .bg-forensic-verified {
+    background-color: hsl(var(--forensic-verified) / 0.1);
+    border-color: hsl(var(--forensic-verified) / 0.3);
+  }
+  
+  .bg-forensic-suspicious {
+    background-color: hsl(var(--forensic-suspicious) / 0.1);
+    border-color: hsl(var(--forensic-suspicious) / 0.3);
   }
 }
