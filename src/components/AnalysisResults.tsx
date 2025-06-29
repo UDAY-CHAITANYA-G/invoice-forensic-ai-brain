@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Shield, CheckCircle, XCircle, AlertTriangle, Download, Eye, IndianRupee, FileText } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -209,10 +208,6 @@ const AnalysisResults: React.FC<AnalysisResultsProps> = ({ data }) => {
                 <span className="font-medium">{data.risk_assessment.final_decision}</span>
               </div>
               <div className="flex space-x-2">
-                <Button variant="outline" size="sm">
-                  <Eye className="h-4 w-4 mr-2" />
-                  View Details
-                </Button>
                 <Button onClick={handleExportPDF} variant="outline" size="sm">
                   <FileText className="h-4 w-4 mr-2" />
                   Export PDF
