@@ -151,7 +151,7 @@ const DocumentViewer: React.FC<DocumentViewerProps> = ({ file, isOpen, onClose }
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-6xl max-h-[90vh] p-0">
+      <DialogContent className="max-w-6xl max-h-[90vh] p-1">
         <DialogHeader className="px-6 py-4 border-b">
           <DialogTitle className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
@@ -159,57 +159,8 @@ const DocumentViewer: React.FC<DocumentViewerProps> = ({ file, isOpen, onClose }
               <span>{file.name}</span>
             </div>
             <div className="flex items-center space-x-2">
-              {/* Tool Selection */}
-              <div className="flex items-center space-x-1 border rounded-md p-1">
-                <Button
-                  variant={selectedTool === 'move' ? 'default' : 'ghost'}
-                  size="sm"
-                  onClick={() => setSelectedTool('move')}
-                >
-                  <Move className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant={selectedTool === 'highlight' ? 'default' : 'ghost'}
-                  size="sm"
-                  onClick={() => setSelectedTool('highlight')}
-                >
-                  <Highlighter className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant={selectedTool === 'comment' ? 'default' : 'ghost'}
-                  size="sm"
-                  onClick={() => setSelectedTool('comment')}
-                >
-                  <MessageSquare className="h-4 w-4" />
-                </Button>
-              </div>
-              
-              {/* Zoom Controls */}
-              <div className="flex items-center space-x-2">
-                <Button variant="outline" size="sm" onClick={handleZoomOut}>
-                  <ZoomOut className="h-4 w-4" />
-                </Button>
-                <div className="w-24">
-                  <Slider
-                    value={zoom}
-                    onValueChange={setZoom}
-                    min={25}
-                    max={300}
-                    step={25}
-                  />
-                </div>
-                <span className="text-sm w-12">{zoom[0]}%</span>
-                <Button variant="outline" size="sm" onClick={handleZoomIn}>
-                  <ZoomIn className="h-4 w-4" />
-                </Button>
-              </div>
-              
-              {/* Other Controls */}
-              <Button variant="outline" size="sm" onClick={handleRotate}>
-                <RotateCw className="h-4 w-4" />
-              </Button>
-              <Button variant="outline" size="sm" onClick={handleExportAnnotated}>
-                <Download className="h-4 w-4" />
+              <Button variant="outline" size="sm" onClick={onClose}>
+                <X className="h-4 w-4" />
               </Button>
             </div>
           </DialogTitle>
@@ -217,23 +168,24 @@ const DocumentViewer: React.FC<DocumentViewerProps> = ({ file, isOpen, onClose }
         
         <div 
           ref={containerRef}
-          className="flex-1 overflow-hidden bg-slate-100 relative"
+          className="flex-1 bg-slate-100 relative"
           style={{ height: 'calc(90vh - 120px)' }}
         >
           <div
             ref={contentRef}
-            className="relative w-full h-full overflow-auto cursor-move"
-            onMouseDown={handleMouseDown}
-            onMouseMove={handleMouseMove}
-            onMouseUp={handleMouseUp}
-            style={{ cursor: selectedTool === 'move' ? 'move' : 'crosshair' }}
+            className="relative w-full h-full"
+            style={{ cursor: 'default', padding: '0.25rem' }}
           >
             <div
-              className="relative bg-white shadow-lg mx-auto my-8"
+              className="relative bg-white shadow-lg"
               style={{
-                transform: `translate(${position.x}px, ${position.y}px) scale(${zoom[0] / 100}) rotate(${rotation}deg)`,
-                transformOrigin: 'center',
-                width: 'fit-content'
+                width: '100%',
+                height: '100%',
+                margin: '0rem !important',
+                boxSizing: 'border-box',
+                padding: '0.25rem',
+                transform: undefined,
+                transformOrigin: undefined
               }}
             >
               {isImage ? (
@@ -244,11 +196,13 @@ const DocumentViewer: React.FC<DocumentViewerProps> = ({ file, isOpen, onClose }
                   draggable={false}
                 />
               ) : isPdf ? (
-                <iframe
-                  src={fileUrl}
-                  className="w-[800px] h-[1000px] border-none"
-                  title="PDF Document"
-                />
+                <div style={{ width: '100%', height: '80vh', overflow: 'auto', display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '0.25rem' }}>
+                  <iframe
+                    src={fileUrl}
+                    style={{ width: '100%', height: '100%', border: 'none' }}
+                    title="PDF Document"
+                  />
+                </div>
               ) : (
                 <div className="w-[800px] h-[600px] flex items-center justify-center text-slate-500">
                   <div className="text-center">
@@ -313,18 +267,7 @@ const DocumentViewer: React.FC<DocumentViewerProps> = ({ file, isOpen, onClose }
                     </Popover>
                   )}
                   {annotation.type === 'highlight' && (
-                    <Button
-                      size="sm"
-                      variant="destructive"
-                      className="absolute w-6 h-6 p-0"
-                      style={{
-                        left: annotation.x + (annotation.width || 0) - 24,
-                        top: annotation.y - 12
-                      }}
-                      onClick={() => removeAnnotation(annotation.id)}
-                    >
-                      <X className="h-3 w-3" />
-                    </Button>
+                    <></>
                   )}
                 </div>
               ))}
