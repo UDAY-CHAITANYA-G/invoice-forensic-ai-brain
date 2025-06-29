@@ -1,6 +1,5 @@
-
 import React from 'react';
-import { Shield, CheckCircle, XCircle, AlertTriangle, Download, Eye } from 'lucide-react';
+import { Shield, CheckCircle, XCircle, AlertTriangle, Download, Eye, IndianRupee } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -48,6 +47,14 @@ const AnalysisResults: React.FC<AnalysisResultsProps> = ({ data }) => {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+  };
+
+  const formatIndianCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      minimumFractionDigits: 2
+    }).format(amount);
   };
 
   return (
@@ -238,6 +245,7 @@ const AnalysisResults: React.FC<AnalysisResultsProps> = ({ data }) => {
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
             {getStatusIcon(data.price_check.overall_status === 'valid')}
+            <IndianRupee className="h-5 w-5" />
             <span>Price Analysis</span>
             <Badge 
               variant={data.price_check.overall_status === 'valid' ? 'default' : 'destructive'}
@@ -251,7 +259,7 @@ const AnalysisResults: React.FC<AnalysisResultsProps> = ({ data }) => {
             {data.price_check.total_overpricing > 0 && (
               <div className="bg-red-50 p-3 rounded-lg border border-red-200">
                 <span className="text-sm text-red-800">
-                  Total Overpricing Detected: <span className="font-bold">${data.price_check.total_overpricing.toFixed(2)}</span>
+                  Total Overpricing Detected: <span className="font-bold">{formatIndianCurrency(data.price_check.total_overpricing)}</span>
                 </span>
               </div>
             )}
@@ -273,8 +281,8 @@ const AnalysisResults: React.FC<AnalysisResultsProps> = ({ data }) => {
                     <tr key={index} className="border-b">
                       <td className="py-2 font-medium">{item.item_name}</td>
                       <td className="text-center py-2">{item.quantity}</td>
-                      <td className="text-right py-2">${item.invoice_price.toFixed(2)}</td>
-                      <td className="text-right py-2">${item.estimated_market_price.toFixed(2)}</td>
+                      <td className="text-right py-2">{formatIndianCurrency(item.invoice_price)}</td>
+                      <td className="text-right py-2">{formatIndianCurrency(item.estimated_market_price)}</td>
                       <td className="text-right py-2">{item.margin_percentage.toFixed(1)}%</td>
                       <td className="text-center py-2">
                         <Badge 

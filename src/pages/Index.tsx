@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Upload, FileText, Shield, AlertTriangle, CheckCircle, XCircle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -40,7 +39,7 @@ const Index = () => {
       await new Promise(resolve => setTimeout(resolve, 1500));
     }
 
-    // Mock analysis results
+    // Mock analysis results with Indian currency
     const mockResults: AnalysisData = {
       document_type: 'invoice',
       logo_verification: {
@@ -70,21 +69,21 @@ const Index = () => {
           {
             item_name: 'Software License',
             quantity: 5,
-            invoice_price: 299.99,
-            estimated_market_price: 279.99,
+            invoice_price: 24999.00,
+            estimated_market_price: 23299.00,
             margin_percentage: 7.1,
             status: 'valid'
           },
           {
             item_name: 'Support Package',
             quantity: 1,
-            invoice_price: 1299.99,
-            estimated_market_price: 899.99,
+            invoice_price: 108299.00,
+            estimated_market_price: 74999.00,
             margin_percentage: 44.4,
             status: 'inflated'
           }
         ],
-        total_overpricing: 400.00,
+        total_overpricing: 33300.00,
         overall_status: 'suspicious'
       },
       risk_assessment: {
