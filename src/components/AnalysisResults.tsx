@@ -1,10 +1,12 @@
+
 import React from 'react';
-import { Shield, CheckCircle, XCircle, AlertTriangle, Download, Eye, IndianRupee } from 'lucide-react';
+import { Shield, CheckCircle, XCircle, AlertTriangle, Download, Eye, IndianRupee, FileText } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { AnalysisData } from '@/types/forensic';
+import jsPDF from 'jspdf';
 
 interface AnalysisResultsProps {
   data: AnalysisData;
@@ -47,6 +49,122 @@ const AnalysisResults: React.FC<AnalysisResultsProps> = ({ data }) => {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+  };
+
+  const handleExportPDF = () => {
+    const pdf = new jsPDF();
+    const reportId = `FR-${Date.now()}`;
+    
+    // Header
+    pdf.setFontSize(20);
+    pdf.text('Forensic Document Analysis Report', 20, 20);
+    
+    pdf.setFontSize(12);
+    pdf.text(`Report ID: ${reportId}`, 20, 35);
+    pdf.text(`Generated: ${new Date().toLocaleString()}`, 20, 45);
+    
+    // Risk Assessment
+    pdf.setFontSize(16);
+    pdf.text('Risk Assessment', 20, 65);
+    pdf.setFontSize(12);
+    pdf.text(`Risk Level: ${data.risk_assessment.risk_level}`, 20, 80);
+    pdf.text(`Fraud Score: ${data.risk_assessment.fraud_score}/100`, 20, 90);
+    pdf.text(`Decision: ${data.risk_assessment.final_decision}`, 20, 100);
+    
+    // Summary
+    pdf.setFontSize(14);
+    pdf.text('Analysis Summary', 20, 120);
+    pdf.setFontSize(10);
+    const summaryLines = pdf.splitTextToSize(data.summary, 170);
+    pdf.text(summaryLines, 20, 135);
+    
+    let yPosition = 135 + (summaryLines.length * 5) + 15;
+    
+    // Logo Verification
+    pdf.setFontSize(14);
+    pdf.text('Logo Verification', 20, yPosition);
+    yPosition += 15;
+    pdf.setFontSize(10);
+    pdf.text(`Company: ${data.logo_verification.company_name}`, 20, yPosition);
+    yPosition += 10;
+    pdf.text(`Status: ${data.logo_verification.status}`, 20, yPosition);
+    yPosition += 10;
+    pdf.text(`Confidence: ${(data.logo_verification.confidence_score * 100).toFixed(1)}%`, 20, yPosition);
+    yPosition += 20;
+    
+    // Company Verification
+    pdf.setFontSize(14);
+    pdf.text('Company Verification', 20, yPosition);
+    yPosition += 15;
+    pdf.setFontSize(10);
+    pdf.text(`Status: ${data.company_verification.status}`, 20, yPosition);
+    yPosition += 10;
+    pdf.text(`Match Found: ${data.company_verification.matched ? 'Yes' : 'No'}`, 20, yPosition);
+    yPosition += 20;
+    
+    // Price Analysis
+    pdf.setFontSize(14);
+    pdf.text('Price Analysis', 20, yPosition);
+    yPosition += 15;
+    pdf.setFontSize(10);
+    pdf.text(`Overall Status: ${data.price_check.overall_status}`, 20, yPosition);
+    yPosition += 10;
+    
+    if (data.price_check.total_overpricing > 0) {
+      pdf.text(`Total Overpricing: ${formatIndianCurrency(data.price_check.total_overpricing)}`, 20, yPosition);
+      yPosition += 15;
+    }
+    
+    // Items table
+    pdf.text('Items Reviewed:', 20, yPosition);
+    yPosition += 10;
+    
+    data.price_check.items_reviewed.forEach((item, index) => {
+      if (yPosition > 250) {
+        pdf.addPage();
+        yPosition = 20;
+      }
+      
+      pdf.text(`${index + 1}. ${item.item_name}`, 25, yPosition);
+      yPosition += 8;
+      pdf.text(`   Quantity: ${item.quantity}`, 25, yPosition);
+      yPosition += 8;
+      pdf.text(`   Invoice Price: ${formatIndianCurrency(item.invoice_price)}`, 25, yPosition);
+      yPosition += 8;
+      pdf.text(`   Market Price: ${formatIndianCurrency(item.estimated_market_price)}`, 25, yPosition);
+      yPosition += 8;
+      pdf.text(`   Margin: ${item.margin_percentage.toFixed(1)}%`, 25, yPosition);
+      yPosition += 8;
+      pdf.text(`   Status: ${item.status}`, 25, yPosition);
+      yPosition += 15;
+    });
+    
+    // Template Check
+    if (yPosition > 200) {
+      pdf.addPage();
+      yPosition = 20;
+    }
+    
+    pdf.setFontSize(14);
+    pdf.text('Template Structure', 20, yPosition);
+    yPosition += 15;
+    pdf.setFontSize(10);
+    pdf.text(`Format: ${data.template_check.standard_format ? 'Standard' : 'Non-standard'}`, 20, yPosition);
+    yPosition += 10;
+    pdf.text(`Confidence: ${(data.template_check.confidence_score * 100).toFixed(1)}%`, 20, yPosition);
+    yPosition += 20;
+    
+    // Anomaly Detection
+    pdf.setFontSize(14);
+    pdf.text('Anomaly Detection', 20, yPosition);
+    yPosition += 15;
+    pdf.setFontSize(10);
+    pdf.text(`Tampering Detected: ${data.anomaly_detection.tampering_detected ? 'Yes' : 'No'}`, 20, yPosition);
+    yPosition += 10;
+    pdf.text(`Confidence: ${(data.anomaly_detection.confidence_score * 100).toFixed(1)}%`, 20, yPosition);
+    
+    // Save the PDF
+    pdf.save(`forensic-report-${reportId}.pdf`);
   };
 
   const formatIndianCurrency = (amount: number) => {
@@ -95,9 +213,13 @@ const AnalysisResults: React.FC<AnalysisResultsProps> = ({ data }) => {
                   <Eye className="h-4 w-4 mr-2" />
                   View Details
                 </Button>
+                <Button onClick={handleExportPDF} variant="outline" size="sm">
+                  <FileText className="h-4 w-4 mr-2" />
+                  Export PDF
+                </Button>
                 <Button onClick={handleExportReport} size="sm">
                   <Download className="h-4 w-4 mr-2" />
-                  Export Report
+                  Export JSON
                 </Button>
               </div>
             </div>
