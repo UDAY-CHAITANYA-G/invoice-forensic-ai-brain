@@ -63,116 +63,175 @@ const AnalysisResults: React.FC<AnalysisResultsProps> = ({ data }) => {
   const handleExportPDF = () => {
     const pdf = new jsPDF();
     const reportId = `FR-${Date.now()}`;
-    
-    // Header
+
+    // Header with color background
+    pdf.setFillColor(34, 58, 120); // Deep blue
+    pdf.rect(0, 0, 210, 25, 'F');
+    pdf.setTextColor(255, 255, 255);
     pdf.setFontSize(20);
-    pdf.text('Forensic Document Analysis Report', 20, 20);
-    
+    pdf.setFont('helvetica', 'bold');
+    pdf.text('Forensic Document Analysis Report', 105, 17, { align: 'center' });
     pdf.setFontSize(12);
-    pdf.text(`Report ID: ${reportId}`, 20, 35);
-    pdf.text(`Generated: ${new Date().toLocaleString()}`, 20, 45);
-    
-    // Risk Assessment
+    pdf.text(`Report ID: ${reportId}`, 10, 32);
+    pdf.text(`Generated: ${new Date().toLocaleString()}`, 10, 40);
+    pdf.setTextColor(0, 0, 0);
+    pdf.setFont('helvetica', 'normal');
+
+    let yPosition = 48;
+
+    // Section: Risk Assessment
     pdf.setFontSize(16);
-    pdf.text('Risk Assessment', 20, 65);
+    pdf.setFont('helvetica', 'bold');
+    pdf.text('Risk Assessment', 10, yPosition);
+    yPosition += 8;
+    pdf.setDrawColor(34, 58, 120);
+    pdf.setLineWidth(0.8);
+    pdf.line(10, yPosition, 200, yPosition);
+    yPosition += 6;
     pdf.setFontSize(12);
-    pdf.text(`Risk Level: ${data.risk_assessment.risk_level}`, 20, 80);
-    pdf.text(`Fraud Score: ${data.risk_assessment.fraud_score}/100`, 20, 90);
-    pdf.text(`Decision: ${data.risk_assessment.final_decision}`, 20, 100);
-    
-    // Summary
-    pdf.setFontSize(14);
-    pdf.text('Analysis Summary', 20, 120);
-    pdf.setFontSize(10);
-    const summaryLines = pdf.splitTextToSize(data.summary, 170);
-    pdf.text(summaryLines, 20, 135);
-    
-    let yPosition = 135 + (summaryLines.length * 5) + 15;
-    
-    // Logo Verification
-    pdf.setFontSize(14);
-    pdf.text('Logo Verification', 20, yPosition);
-    yPosition += 15;
-    pdf.setFontSize(10);
-    pdf.text(`Company: ${data.logo_verification.company_name}`, 20, yPosition);
+    pdf.setFont('helvetica', 'normal');
+    pdf.text(`Risk Level: ${data.risk_assessment.risk_level}`, 10, yPosition);
+    yPosition += 7;
+    pdf.text(`Fraud Score: ${data.risk_assessment.fraud_score}/100`, 10, yPosition);
+    yPosition += 7;
+    pdf.text(`Decision: ${data.risk_assessment.final_decision}`, 10, yPosition);
     yPosition += 10;
-    pdf.text(`Status: ${data.logo_verification.status}`, 20, yPosition);
-    yPosition += 10;
-    pdf.text(`Confidence: ${(data.logo_verification.confidence_score * 100).toFixed(1)}%`, 20, yPosition);
-    yPosition += 20;
-    
-    // Company Verification
+
+    // Section: Analysis Summary
     pdf.setFontSize(14);
-    pdf.text('Company Verification', 20, yPosition);
-    yPosition += 15;
+    pdf.setFont('helvetica', 'bold');
+    pdf.text('Analysis Summary', 10, yPosition);
+    yPosition += 7;
+    pdf.setDrawColor(180, 180, 180);
+    pdf.setLineWidth(0.5);
+    pdf.line(10, yPosition, 200, yPosition);
+    yPosition += 6;
     pdf.setFontSize(10);
-    pdf.text(`Status: ${data.company_verification.status}`, 20, yPosition);
-    yPosition += 10;
-    pdf.text(`Match Found: ${data.company_verification.matched ? 'Yes' : 'No'}`, 20, yPosition);
-    yPosition += 20;
-    
-    // Price Analysis
-    pdf.setFontSize(14);
-    pdf.text('Price Analysis', 20, yPosition);
-    yPosition += 15;
+    pdf.setFont('helvetica', 'normal');
+    const summaryLines = pdf.splitTextToSize(data.summary, 190);
+    pdf.text(summaryLines, 10, yPosition);
+    yPosition += summaryLines.length * 5 + 8;
+
+    // Section: Logo Verification
+    pdf.setFontSize(13);
+    pdf.setFont('helvetica', 'bold');
+    pdf.text('Logo Verification', 10, yPosition);
+    yPosition += 7;
+    pdf.setDrawColor(180, 180, 180);
+    pdf.line(10, yPosition, 200, yPosition);
+    yPosition += 6;
     pdf.setFontSize(10);
-    pdf.text(`Overall Status: ${data.price_check.overall_status}`, 20, yPosition);
+    pdf.setFont('helvetica', 'normal');
+    pdf.text(`Company: ${data.logo_verification.company_name}`, 10, yPosition);
+    yPosition += 5;
+    pdf.text(`Status: ${data.logo_verification.status}`, 10, yPosition);
+    yPosition += 5;
+    pdf.text(`Confidence: ${(data.logo_verification.confidence_score * 100).toFixed(1)}%`, 10, yPosition);
     yPosition += 10;
-    
+
+    // Section: Company Verification
+    pdf.setFontSize(13);
+    pdf.setFont('helvetica', 'bold');
+    pdf.text('Company Verification', 10, yPosition);
+    yPosition += 7;
+    pdf.setDrawColor(180, 180, 180);
+    pdf.line(10, yPosition, 200, yPosition);
+    yPosition += 6;
+    pdf.setFontSize(10);
+    pdf.setFont('helvetica', 'normal');
+    pdf.text(`Status: ${data.company_verification.status}`, 10, yPosition);
+    yPosition += 5;
+    pdf.text(`Match Found: ${data.company_verification.matched ? 'Yes' : 'No'}`, 10, yPosition);
+    yPosition += 10;
+
+    // Section: Price Analysis
+    pdf.setFontSize(13);
+    pdf.setFont('helvetica', 'bold');
+    pdf.text('Price Analysis', 10, yPosition);
+    yPosition += 7;
+    pdf.setDrawColor(180, 180, 180);
+    pdf.line(10, yPosition, 200, yPosition);
+    yPosition += 6;
+    pdf.setFontSize(10);
+    pdf.setFont('helvetica', 'normal');
+    pdf.text(`Overall Status: ${data.price_check.overall_status}`, 10, yPosition);
+    yPosition += 5;
     if (data.price_check.total_overpricing > 0) {
-      pdf.text(`Total Overpricing: ${formatIndianCurrency(data.price_check.total_overpricing)}`, 20, yPosition);
-      yPosition += 15;
+      pdf.text(`Total Overpricing: ${formatIndianCurrency(data.price_check.total_overpricing)}`, 10, yPosition);
+      yPosition += 7;
     }
-    
-    // Items table
-    pdf.text('Items Reviewed:', 20, yPosition);
-    yPosition += 10;
-    
+    pdf.text('Items Reviewed:', 10, yPosition);
+    yPosition += 6;
     data.price_check.items_reviewed.forEach((item, index) => {
-      if (yPosition > 250) {
+      if (yPosition > 260) {
         pdf.addPage();
         yPosition = 20;
       }
-      
-      pdf.text(`${index + 1}. ${item.item_name}`, 25, yPosition);
-      yPosition += 8;
-      pdf.text(`   Quantity: ${item.quantity}`, 25, yPosition);
-      yPosition += 8;
-      pdf.text(`   Invoice Price: ${formatIndianCurrency(item.invoice_price)}`, 25, yPosition);
-      yPosition += 8;
-      pdf.text(`   Market Price: ${formatIndianCurrency(item.estimated_market_price)}`, 25, yPosition);
-      yPosition += 8;
-      pdf.text(`   Margin: ${item.margin_percentage.toFixed(1)}%`, 25, yPosition);
-      yPosition += 8;
-      pdf.text(`   Status: ${item.status}`, 25, yPosition);
-      yPosition += 15;
+      pdf.setFont('helvetica', 'bold');
+      pdf.text(`${index + 1}. ${item.item_name}`, 15, yPosition);
+      pdf.setFont('helvetica', 'normal');
+      yPosition += 5;
+      pdf.text(`   Quantity: ${item.quantity}`, 15, yPosition);
+      yPosition += 5;
+      pdf.text(`   Invoice Price: ${formatIndianCurrency(item.invoice_price)}`, 15, yPosition);
+      yPosition += 5;
+      pdf.text(`   Market Price: ${formatIndianCurrency(item.estimated_market_price)}`, 15, yPosition);
+      yPosition += 5;
+      pdf.text(`   Margin: ${typeof item.margin_percentage === 'number' && item.margin_percentage > 50 ? 'forensic-suspicious' : 'forensic-verified'}`, 15, yPosition);
+      yPosition += 5;
+      pdf.text(`   Status: ${item.status}`, 15, yPosition);
+      yPosition += 7;
     });
-    
-    // Template Check
-    if (yPosition > 200) {
+    yPosition += 3;
+
+    // Section: Template Structure
+    if (yPosition > 230) {
       pdf.addPage();
       yPosition = 20;
     }
-    
-    pdf.setFontSize(14);
-    pdf.text('Template Structure', 20, yPosition);
-    yPosition += 15;
+    pdf.setFontSize(13);
+    pdf.setFont('helvetica', 'bold');
+    pdf.text('Template Structure', 10, yPosition);
+    yPosition += 7;
+    pdf.setDrawColor(180, 180, 180);
+    pdf.line(10, yPosition, 200, yPosition);
+    yPosition += 6;
     pdf.setFontSize(10);
-    pdf.text(`Format: ${data.template_check.standard_format ? 'Standard' : 'Non-standard'}`, 20, yPosition);
+    pdf.setFont('helvetica', 'normal');
+    pdf.text(`Format: ${data.template_check.standard_format ? 'Standard' : 'Non-standard'}`, 10, yPosition);
+    yPosition += 5;
+    pdf.text(`Confidence: ${(data.template_check.confidence_score * 100).toFixed(1)}%`, 10, yPosition);
     yPosition += 10;
-    pdf.text(`Confidence: ${(data.template_check.confidence_score * 100).toFixed(1)}%`, 20, yPosition);
-    yPosition += 20;
-    
-    // Anomaly Detection
-    pdf.setFontSize(14);
-    pdf.text('Anomaly Detection', 20, yPosition);
-    yPosition += 15;
+
+    // Section: Anomaly Detection
+    if (yPosition > 230) {
+      pdf.addPage();
+      yPosition = 20;
+    }
+    pdf.setFontSize(13);
+    pdf.setFont('helvetica', 'bold');
+    pdf.text('Anomaly Detection', 10, yPosition);
+    yPosition += 7;
+    pdf.setDrawColor(180, 180, 180);
+    pdf.line(10, yPosition, 200, yPosition);
+    yPosition += 6;
     pdf.setFontSize(10);
-    pdf.text(`Tampering Detected: ${data.anomaly_detection.tampering_detected ? 'Yes' : 'No'}`, 20, yPosition);
+    pdf.setFont('helvetica', 'normal');
+    pdf.text(`Tampering Detected: ${data.anomaly_detection.tampering_detected ? 'Yes' : 'No'}`, 10, yPosition);
+    yPosition += 5;
+    pdf.text(`Confidence: ${(data.anomaly_detection.confidence_score * 100).toFixed(1)}%`, 10, yPosition);
     yPosition += 10;
-    pdf.text(`Confidence: ${(data.anomaly_detection.confidence_score * 100).toFixed(1)}%`, 20, yPosition);
-    
-    // Save the PDF
+
+    // Footer with page number and branding
+    const pageCount = pdf.internal.pages.length;
+    for (let i = 1; i <= pageCount; i++) {
+      pdf.setPage(i);
+      pdf.setFontSize(9);
+      pdf.setTextColor(120, 120, 120);
+      pdf.text(`Page ${i} of ${pageCount}`, 200, 292, { align: 'right' });
+      pdf.text('Generated by Forensic Document Analyzer', 10, 292);
+    }
+
     pdf.save(`forensic-report-${reportId}.pdf`);
   };
 
@@ -225,10 +284,6 @@ const AnalysisResults: React.FC<AnalysisResultsProps> = ({ data }) => {
                 <Button onClick={handleExportPDF} variant="outline" size="sm">
                   <FileText className="h-4 w-4 mr-2" />
                   Export PDF
-                </Button>
-                <Button onClick={handleExportReport} size="sm">
-                  <Download className="h-4 w-4 mr-2" />
-                  Export JSON
                 </Button>
               </div>
             </div>
@@ -419,8 +474,10 @@ const AnalysisResults: React.FC<AnalysisResultsProps> = ({ data }) => {
                       <td className="text-center py-2">{item.quantity}</td>
                       <td className="text-right py-2">{formatIndianCurrency(item.invoice_price)}</td>
                       <td className="text-right py-2">{formatIndianCurrency(item.estimated_market_price)}</td>
-                      <td className={`text-right py-2 ${item.margin_percentage > 50 ? 'forensic-suspicious' : 'forensic-verified'}`}>
-                        {item.margin_percentage.toFixed(1)}%
+                      <td className={`text-right py-2 ${typeof item.margin_percentage === 'number' && item.margin_percentage > 50 ? 'forensic-suspicious' : 'forensic-verified'}`}>
+                        {Number.isFinite(item.margin_percentage)
+                          ? item.margin_percentage.toFixed(1) + '%'
+                          : String(item.margin_percentage)}
                       </td>
                       <td className="text-center py-2">
                         <Badge 

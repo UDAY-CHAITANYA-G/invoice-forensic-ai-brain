@@ -17,21 +17,12 @@ const DocumentPreview: React.FC<DocumentPreviewProps> = ({ file }) => {
   return (
     <>
       <div className="space-y-4">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between p-4 border rounded-lg bg-white shadow-sm">
           <div className="flex items-center space-x-2 text-sm text-slate-600">
             {isPdf ? <FileText className="h-4 w-4" /> : <Image className="h-4 w-4" />}
             <span>{file.name}</span>
             <span className="text-slate-400">({(file.size / 1024 / 1024).toFixed(2)} MB)</span>
           </div>
-          <Button 
-            variant="outline" 
-            size="sm"
-            onClick={() => setIsViewerOpen(true)}
-            className="flex items-center space-x-1"
-          >
-            <Eye className="h-4 w-4" />
-            <span>View Document</span>
-          </Button>
         </div>
         
         <div 
