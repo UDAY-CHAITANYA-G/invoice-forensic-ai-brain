@@ -6,11 +6,11 @@ import requests
 import google.generativeai as genai
 
 # Configure API key
-genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+# genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 
-models = genai.list_models()
-for m in models:
-    print(m)
+# models = genai.list_models()
+# for m in models:
+#     print(m)
 
 def get_diff(repo, pr_number, github_token):
     url = f"https://api.github.com/repos/{repo}/pulls/{pr_number}/files"
@@ -30,7 +30,7 @@ def review_code(diff_text):
     )
 
     # Create the Gemini model instance
-    model = genai.GenerativeModel("gemini-1.5")
+     model = genai.GenerativeModel("gemini-2.5-pro")
 
     # Generate the response
     response = model.generate_content(prompt)
