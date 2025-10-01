@@ -8,6 +8,10 @@ import google.generativeai as genai
 # Configure API key
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 
+models = genai.list_models()
+for m in models:
+    print(m)
+
 def get_diff(repo, pr_number, github_token):
     url = f"https://api.github.com/repos/{repo}/pulls/{pr_number}/files"
     headers = {"Authorization": f"token {github_token}"}
