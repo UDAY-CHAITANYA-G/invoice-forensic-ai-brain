@@ -17,6 +17,7 @@ def get_diff(repo, pr_number, github_token):
     patches = [f["patch"] for f in files if "patch" in f]
     return "\n".join(patches)
 
+
 def review_code(diff_text):
     prompt = (
         "You are a code reviewer. Review the following diff for style, correctness, "
@@ -24,14 +25,12 @@ def review_code(diff_text):
         f"{diff_text}"
     )
 
-    # Create model instance
-    model = genai.TextGenerationModel.from_pretrained("gemini-1.5")
-    
-    # Generate response
-    response = model.predict(
-        prompt,
-        max_output_tokens=1024
-    )
+    # Create the Gemini model instance
+    model = genai.GenerativeModel("gemini-1.5")
+
+    # Generate the response
+    response = model.generate_content(prompt)
+
     return response.text
 
 def post_comment(repo, pr_number, github_token, comment_body):
