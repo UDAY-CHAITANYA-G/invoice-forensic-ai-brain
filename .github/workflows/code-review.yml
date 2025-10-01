@@ -24,8 +24,7 @@ jobs:
 
       - name: Setup GCP credentials
         run: |
-          echo "${{ secrets.GCP_SA_KEY }}" > $HOME/gcp_key.json
-          # Export GOOGLE_APPLICATION_CREDENTIALS so SDK picks it up
+          echo '${{ secrets.GCP_SA_KEY }}' > $HOME/gcp_key.json
           echo "GOOGLE_APPLICATION_CREDENTIALS=$HOME/gcp_key.json" >> $GITHUB_ENV
 
       - name: Run Gemini review
