@@ -23,9 +23,13 @@ def review_code(diff_text):
         "security issues, and improvements. Provide comments and suggestions.\n\n"
         f"{diff_text}"
     )
-    response = genai.generate_text(
-        model="gemini-1.5",
-        prompt=prompt,
+
+    # Create model instance
+    model = genai.TextGenerationModel.from_pretrained("gemini-1.5")
+    
+    # Generate response
+    response = model.predict(
+        prompt,
         max_output_tokens=1024
     )
     return response.text
