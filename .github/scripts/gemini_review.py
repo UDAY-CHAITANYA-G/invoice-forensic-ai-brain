@@ -2,6 +2,9 @@ import os
 import requests
 from google.cloud import aiplatform
 
+import vertexai
+from vertexai.generative_models import GenerativeModel
+
 def get_diff(repo, pr_number, github_token):
     """Fetch diff (patch) from GitHub PR."""
     url = f"https://api.github.com/repos/{repo}/pulls/{pr_number}/files"
@@ -20,10 +23,9 @@ def get_diff(repo, pr_number, github_token):
 
 def review_code(diff_text, project_id):
     """Call Gemini / Vertex AI to review code diff."""
-    aiplatform.init(project=project_id, location="us-central1")
+    vertexai.init(project=project_id, location="us-central1")
 
-    # Here choose your Gemini model; adjust based on availability
-    model = aiplatform.GenerativeModel("gemini-1.5-flash")
+    model = GenerativeModel("gemini-1.5-flash")
 
     prompt = (
         "You are a code reviewer. Review the following diff for style, correctness, "
