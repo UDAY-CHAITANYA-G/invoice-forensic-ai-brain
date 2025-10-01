@@ -1,26 +1,7 @@
-# import os
-# import requests
-# from google.cloud import aiplatform
-import os
-import requests
 import google.generativeai as genai
+import os
 
-# Configure API key
-# genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-
-# models = genai.list_models()
-# for m in models:
-#     print(m)
-
-def get_diff(repo, pr_number, github_token):
-    url = f"https://api.github.com/repos/{repo}/pulls/{pr_number}/files"
-    headers = {"Authorization": f"token {github_token}"}
-    resp = requests.get(url, headers=headers)
-    resp.raise_for_status()
-    files = resp.json()
-    patches = [f["patch"] for f in files if "patch" in f]
-    return "\n".join(patches)
-
+genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 
 def review_code(diff_text):
     prompt = (
@@ -29,37 +10,21 @@ def review_code(diff_text):
         f"{diff_text}"
     )
 
-    # Create the Gemini model instance
-     model = genai.GenerativeModel("gemini-2.5-pro")
-
-    # Generate the response
+    # Correct indentation here (4 spaces)
+    model = genai.GenerativeModel("gemini-2.5-pro")
     response = model.generate_content(prompt)
-
     return response.text
 
-def post_comment(repo, pr_number, github_token, comment_body):
-    url = f"https://api.github.com/repos/{repo}/issues/{pr_number}/comments"
-    headers = {"Authorization": f"token {github_token}"}
-    resp = requests.post(url, json={"body": comment_body}, headers=headers)
-    resp.raise_for_status()
 
 def main():
-    pr_number = os.getenv("PR_NUMBER")
-    github_token = os.getenv("GITHUB_TOKEN")
-    repo = os.getenv("GITHUB_REPOSITORY")
-
-    diff_text = get_diff(repo, pr_number, github_token)
-    if not diff_text.strip():
-        print("No diff to review.")
-        return
-
+    # Example diff_text for testing
+    diff_text = "diff --git a/example.py b/example.py\n+print('Hello World')"
     review = review_code(diff_text)
-    post_comment(repo, pr_number, github_token, review)
-    print("Review posted.")
+    print("Code Review Output:\n", review)
+
 
 if __name__ == "__main__":
     main()
-
 
 # import vertexai
 # from vertexai.generative_models import GenerativeModel
